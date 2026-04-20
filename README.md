@@ -1,68 +1,60 @@
-# Mic Monitor — Build Instructions
+<div align="center">
+  <img src="assets/icon.png" width="320" height="320" alt="Mic Monitor Icon">
+  <h1>Mic Monitor</h1>
+  <p><strong>A native macOS app for monitoring microphone input levels in real time.</strong></p>
 
-A native macOS app for monitoring microphone input levels in real time.
-
-## Requirements
-
-- macOS with Apple Silicon (M1/M2/M3)
-- Node.js 18+ — download from https://nodejs.org if you don't have it
-  - Check by opening Terminal and running: node --version
+  [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+  [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)]()
+  [![Release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/ghostintheprompt/weirdo/releases)
+</div>
 
 ---
 
-## Steps to build the DMG
+### Features
 
-Open **Terminal**, then run these commands one at a time:
+| Feature | Description |
+| :--- | :--- |
+| **Real-time Monitoring** | Visualizes microphone levels in dB and raw waveform. |
+| **Peak Detection** | Tracks and displays peak levels with clipping indicators. |
+| **Device Selection** | Easily switch between multiple audio input devices. |
+| **Native Feel** | Minimalist macOS-inspired UI with dark mode support. |
 
-### 1. Go into the project folder
-```
-cd ~/Downloads/mic-monitor
+---
+
+### Installation
+
+#### Download DMG
+Download the latest version from the [Releases](https://github.com/ghostintheprompt/weirdo/releases) page.
+
+#### Homebrew Cask
+```bash
+brew install --cask ghostintheprompt/tap/mic-monitor
 ```
 
-### 2. Install dependencies
-```
+#### Build from Source
+```bash
+git clone https://github.com/ghostintheprompt/weirdo.git
+cd weirdo
 npm install
-```
-This downloads Electron (~100MB). Takes a minute or two.
-
-### 3. Build the DMG
-```
 npm run build
 ```
-This creates the DMG file.
-
-### 4. Find your DMG
-Look in the `dist/` folder inside the project:
-```
-open dist/
-```
-You'll see **Mic Monitor-1.0.0-arm64.dmg** — double-click it to install.
 
 ---
 
-## Installing the app
+### Usage
 
-1. Double-click the DMG
-2. Drag **Mic Monitor** into your Applications folder
-3. First launch: right-click the app → Open (macOS will warn about unverified developer — click Open anyway)
-4. When asked for microphone permission, click Allow
-
----
-
-## Troubleshooting
-
-**"App is damaged" error**
-Run this in Terminal:
-```
-xattr -cr /Applications/Mic\ Monitor.app
-```
-
-**Mic permission denied**
-Go to System Settings → Privacy & Security → Microphone → enable Mic Monitor
+1. Launch **Mic Monitor**.
+2. Click **Start Monitoring** to begin capturing audio input.
+3. Select your preferred input device from the dropdown menu.
+4. Watch the real-time dB levels and waveform to monitor signal strength.
 
 ---
 
-## Running without building (for testing)
-```
-npm start
-```
+### Privacy Statement
+Mic Monitor is **local only**. No telemetry, no tracking, and no data collection. Your audio stays on your machine.
+
+---
+
+<div align="center">
+  Built by <strong>MDRN Corp</strong> — <a href="https://mdrn.app">mdrn.app</a>
+</div>
