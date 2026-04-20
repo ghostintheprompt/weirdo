@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/ghostintheprompt/weirdo/main/assets/icon.png" width="320" height="320" alt="Weirdo Icon">
   <h1>Weirdo</h1>
-  <p><strong>A native macOS app for monitoring microphone input levels in real time.</strong></p>
+  <p><strong>The simple, pro-grade mic monitor for macOS. No fluff, just the levels you need.</strong></p>
 
   [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
   [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)]()
@@ -10,28 +10,31 @@
 
 ---
 
-### Features
+### Why use Weirdo?
 
-| Feature | Description |
-| :--- | :--- |
-| **Real-time Monitoring** | Visualizes microphone levels in dB and raw waveform. |
-| **Peak Detection** | Tracks and displays peak levels with clipping indicators. |
-| **Device Selection** | Easily switch between multiple audio input devices. |
-| **Native Feel** | Minimalist macOS-inspired UI with dark mode support. |
+Most apps just give you a jumping green bar. **Weirdo** is built for people who actually care about their audio quality—whether you're dialing in a lavalier mic for a video, setting gain on a podcast, or making sure your interface isn't distorting.
+
+#### 🎙 Works with any mic
+Whether it's a high-end XLR interface, a USB condenser, or a tiny lavalier mic plugged into your jack, if macOS sees it, Weirdo can monitor it. You can switch between devices instantly right in the app.
+
+#### ⚠️ Never clip again
+Digital distortion (clipping) ruins recordings. Weirdo has a dedicated **CLIP** badge that triggers the moment your signal hits the danger zone (0 dB). The meters turn from green to amber and then red, giving you clear visual warnings before your audio gets "crunched."
+
+#### 📈 Pro-level metering
+Instead of guessing, you get real decibel (dB) numbers. It tracks your **Peak Level**—the loudest point reached—so you can find your highest volume and set your gain perfectly. Need to start over? Just hit "Reset Peak."
+
+#### 🌊 See your sound
+A live waveform (oscilloscope) shows you the actual shape of your audio signal. It helps you spot background hum, consistency issues, or if your signal is "flat-topping" (clipping) visually.
 
 ---
 
 ### Installation
 
 #### Download DMG
-Download the latest version from the [Releases](https://github.com/ghostintheprompt/weirdo/releases) page.
-
-#### Homebrew Cask
-```bash
-brew install --cask ghostintheprompt/tap/weirdo
-```
+The easiest way is to download the latest version from the [Releases](https://github.com/ghostintheprompt/weirdo/releases) page.
 
 #### Build from Source
+If you prefer to build it yourself:
 ```bash
 git clone https://github.com/ghostintheprompt/weirdo.git
 cd weirdo
@@ -41,17 +44,9 @@ npm run build
 
 ---
 
-### Usage
-
-1. Launch **Weirdo**.
-2. Click **Start Monitoring** to begin capturing audio input.
-3. Select your preferred input device from the dropdown menu.
-4. Watch the real-time dB levels and waveform to monitor signal strength.
-
----
-
-### Privacy Statement
-Weirdo is **local only**. No telemetry, no tracking, and no data collection. Your audio stays on your machine.
+### Privacy & Speed
+*   **Local Only:** Weirdo never listens to you. It doesn't send audio to the cloud, has zero telemetry, and no tracking.
+*   **Fast & Light:** Built with native macOS technologies for near-zero lag visual feedback.
 
 ---
 
