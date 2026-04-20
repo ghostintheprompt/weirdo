@@ -26,6 +26,7 @@ Instead of guessing, you get real decibel (dB) numbers. It tracks your **Peak Le
 #### High-End Field Features
 *   **Low Cut Filter (80Hz):** Instant rumble and wind noise removal. Clean up your audio before it ever hits the "disk."
 *   **Gain Boost (+20dB):** Perfect for quiet mics or distant sources. Monitor and record whisper-quiet signals with crystalline clarity.
+*   **Professional Naming:** Files are saved as sequential "Takes" (e.g., `WEIRDO_001.webm`, `WEIRDO_002.webm`) so you can track multiple sessions without re-typing filenames.
 *   **Direct-to-Disk Recording:** Capture your audio instantly with the high-fidelity recording engine.
 *   **Tally Light:** A glowing red indicator lets you know exactly when you're "on air."
 *   **Precision Timer:** Tracks your recording duration down to the second.

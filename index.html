@@ -444,10 +444,15 @@
     mediaRecorder.onstop = async () => {
       const blob = new Blob(audioChunks, { type: mimeType });
       const arrayBuffer = await blob.arrayBuffer();
-      const fileName = `weirdo_rec_${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
+      
+      const takeNumber = parseInt(localStorage.getItem('weirdo_take_count')) || 1;
+      const formattedTake = takeNumber.toString().padStart(3, '0');
+      const fileName = `WEIRDO_${formattedTake}.webm`;
+      
       const savedPath = await window.electronAPI.saveRecording(arrayBuffer, fileName);
       if (savedPath) {
-        document.getElementById('statusMsg').textContent = 'Saved to disk';
+        document.getElementById('statusMsg').textContent = `Saved Take ${formattedTake}`;
+        localStorage.setItem('weirdo_take_count', takeNumber + 1);
       }
     };
 
