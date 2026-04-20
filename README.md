@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/ghostintheprompt/weirdo/main/assets/icon.png" width="320" height="320" alt="Mic Monitor Icon">
-  <h1>Mic Monitor</h1>
+  <img src="https://raw.githubusercontent.com/ghostintheprompt/weirdo/main/assets/icon.png" width="320" height="320" alt="Weirdo Icon">
+  <h1>Weirdo</h1>
   <p><strong>A native macOS app for monitoring microphone input levels in real time.</strong></p>
 
   [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -28,7 +28,7 @@ Download the latest version from the [Releases](https://github.com/ghostinthepro
 
 #### Homebrew Cask
 ```bash
-brew install --cask ghostintheprompt/tap/mic-monitor
+brew install --cask ghostintheprompt/tap/weirdo
 ```
 
 #### Build from Source
@@ -43,7 +43,7 @@ npm run build
 
 ### Usage
 
-1. Launch **Mic Monitor**.
+1. Launch **Weirdo**.
 2. Click **Start Monitoring** to begin capturing audio input.
 3. Select your preferred input device from the dropdown menu.
 4. Watch the real-time dB levels and waveform to monitor signal strength.
@@ -51,7 +51,7 @@ npm run build
 ---
 
 ### Privacy Statement
-Mic Monitor is **local only**. No telemetry, no tracking, and no data collection. Your audio stays on your machine.
+Weirdo is **local only**. No telemetry, no tracking, and no data collection. Your audio stays on your machine.
 
 ---
 

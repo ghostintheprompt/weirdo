@@ -1,5 +1,5 @@
 {
-  "name": "mic-monitor",
+  "name": "weirdo",
   "version": "1.0.0",
   "description": "Live microphone level monitor for macOS",
   "main": "main.js",
@@ -12,8 +12,8 @@
     "electron-builder": "^24.0.0"
   },
   "build": {
-    "appId": "com.micmonitor.app",
-    "productName": "Mic Monitor",
+    "appId": "com.weirdo.app",
+    "productName": "Weirdo",
     "mac": {
       "category": "public.app-category.music",
       "target": [
@@ -24,7 +24,7 @@
       "gatekeeperAssess": false
     },
     "dmg": {
-      "title": "Mic Monitor",
+      "title": "Weirdo",
       "window": { "width": 540, "height": 380 }
     },
     "files": [
