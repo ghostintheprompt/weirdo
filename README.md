@@ -23,8 +23,10 @@ Digital distortion (clipping) ruins recordings. Weirdo has a dedicated **CLIP** 
 #### Pro-level metering
 Instead of guessing, you get real decibel (dB) numbers. It tracks your **Peak Level**—the loudest point reached—so you can find your highest volume and set your gain perfectly. Need to start over? Just hit "Reset Peak."
 
-#### Direct-to-Disk Recording
-Capture your audio instantly with the high-fidelity recording engine.
+#### High-End Field Features
+*   **Low Cut Filter (80Hz):** Instant rumble and wind noise removal. Clean up your audio before it ever hits the "disk."
+*   **Gain Boost (+20dB):** Perfect for quiet mics or distant sources. Monitor and record whisper-quiet signals with crystalline clarity.
+*   **Direct-to-Disk Recording:** Capture your audio instantly with the high-fidelity recording engine.
 *   **Tally Light:** A glowing red indicator lets you know exactly when you're "on air."
 *   **Precision Timer:** Tracks your recording duration down to the second.
 *   **Lossless-grade quality:** Records in high-bitrate Opus (WebM) for transparent audio capture.

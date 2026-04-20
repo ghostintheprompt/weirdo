@@ -211,6 +211,48 @@
     }
 
     .clip-badge.show { display: inline-block; }
+
+    .tally {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--red);
+      text-shadow: 0 0 5px var(--red-glow);
+    }
+
+    .tally.active { display: flex; }
+
+    .tally-light {
+      width: 10px;
+      height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--red);
+      animation: blink 0.5s infinite alternate;
+    }
+
+    button#recBtn.recording {
+      background: var(--red);
+      color: #fff;
+      animation: blink 1s infinite alternate;
+    }
+
+    .dsp-row button {
+      flex: 1;
+      padding: 6px;
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
+    .dsp-row button.active {
+      opacity: 1;
+      background: var(--text);
+      color: #000;
+      box-shadow: 0 0 10px var(--green-glow);
+    }
   </style>
 </head>
 <body>
@@ -232,6 +274,10 @@
     <div id="deviceRow">
       <span style="font-size:12px;color:var(--hint)">Input:</span>
       <select id="deviceSelect" onchange="changeDevice()"></select>
+    </div>
+    <div class="dsp-row" id="dspRow" style="display:none; margin-top: 12px; display: flex; gap: 10px;">
+      <button id="lowCutBtn" onclick="toggleLowCut()" title="80Hz Low Cut Filter">Low Cut OFF</button>
+      <button id="boostBtn" onclick="toggleBoost()" title="+20dB Digital Gain Boost">Boost OFF</button>
     </div>
   </div>
 
@@ -269,43 +315,104 @@
 
 <script>
   let audioCtx, analyser, source, stream, animFrame;
+  let lowCutNode, boostNode;
   let peakDb = -Infinity;
   let running = false;
   let clipTimeout = null;
+
+  // DSP States
+  let lowCutActive = false;
+  let boostActive = false;
+
+  // Recording variables
+  let mediaRecorder;
+  let audioChunks = [];
+  let isRecording = false;
+  let startTime;
+  let timerInterval;
 
   function startMonitor() {
     navigator.mediaDevices.getUserMedia({ audio: true, video: false })
       .then(s => {
         stream = s;
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Setup Nodes
+        source = audioCtx.createMediaStreamSource(s);
+        
+        lowCutNode = audioCtx.createBiquadFilter();
+        lowCutNode.type = 'highpass';
+        lowCutNode.frequency.value = lowCutActive ? 80 : 0;
+        
+        boostNode = audioCtx.createGain();
+        boostNode.gain.value = boostActive ? 10.0 : 1.0;
+        
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 2048;
         analyser.smoothingTimeConstant = 0.45;
-        source = audioCtx.createMediaStreamSource(s);
-        source.connect(analyser);
+
+        // Routing: Source -> LowCut -> Boost -> Analyser
+        source.connect(lowCutNode);
+        lowCutNode.connect(boostNode);
+        boostNode.connect(analyser);
+
         running = true;
         document.getElementById('startBtn').style.display = 'none';
         document.getElementById('stopBtn').style.display = '';
+        document.getElementById('recBtn').style.display = '';
         document.getElementById('resetBtn').style.display = '';
+        document.getElementById('dspRow').style.display = 'flex';
         document.getElementById('statusMsg').textContent = 'Listening…';
         document.getElementById('statusMsg').className = 'status ok';
         loadDevices();
         draw();
       })
-      .catch(() => {
-        document.getElementById('statusMsg').textContent = 'Mic access denied — check System Settings › Privacy › Microphone';
+      .catch((err) => {
+        console.error(err);
+        document.getElementById('statusMsg').textContent = 'Mic access denied — check System Settings';
         document.getElementById('statusMsg').className = 'status err';
       });
   }
 
+  function toggleLowCut() {
+    lowCutActive = !lowCutActive;
+    const btn = document.getElementById('lowCutBtn');
+    if (lowCutActive) {
+      if (lowCutNode) lowCutNode.frequency.value = 80;
+      btn.classList.add('active');
+      btn.textContent = 'Low Cut ON (80Hz)';
+    } else {
+      if (lowCutNode) lowCutNode.frequency.value = 0;
+      btn.classList.remove('active');
+      btn.textContent = 'Low Cut OFF';
+    }
+  }
+
+  function toggleBoost() {
+    boostActive = !boostActive;
+    const btn = document.getElementById('boostBtn');
+    if (boostActive) {
+      if (boostNode) boostNode.gain.value = 10.0; // ~+20dB
+      btn.classList.add('active');
+      btn.textContent = 'Boost ON (+20dB)';
+    } else {
+      if (boostNode) boostNode.gain.value = 1.0;
+      btn.classList.remove('active');
+      btn.textContent = 'Boost OFF';
+    }
+  }
+
   function stopMonitor() {
+    if (isRecording) stopRecording();
     running = false;
     cancelAnimationFrame(animFrame);
     if (stream) stream.getTracks().forEach(t => t.stop());
     if (audioCtx) audioCtx.close();
     document.getElementById('startBtn').style.display = '';
     document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('recBtn').style.display = 'none';
     document.getElementById('resetBtn').style.display = 'none';
+    document.getElementById('dspRow').style.display = 'none';
     document.getElementById('deviceRow').style.display = 'none';
     document.getElementById('statusMsg').textContent = 'Stopped';
     document.getElementById('statusMsg').className = 'status';
@@ -315,6 +422,63 @@
     document.getElementById('levelBar').className = 'bar-fill';
     document.getElementById('clipBadge').className = 'clip-badge';
     clearCanvas();
+  }
+
+  function toggleRecord() {
+    if (!isRecording) {
+      startRecording();
+    } else {
+      stopRecording();
+    }
+  }
+
+  function startRecording() {
+    audioChunks = [];
+    const mimeType = 'audio/webm;codecs=opus';
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(audioChunks, { type: mimeType });
+      const arrayBuffer = await blob.arrayBuffer();
+      const fileName = `weirdo_rec_${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
+      const savedPath = await window.electronAPI.saveRecording(arrayBuffer, fileName);
+      if (savedPath) {
+        document.getElementById('statusMsg').textContent = 'Saved to disk';
+      }
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    startTime = Date.now();
+    document.getElementById('recBtn').textContent = 'Stop REC';
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('tally').classList.add('active');
+    document.getElementById('statusMsg').textContent = 'RECORDING';
+    
+    timerInterval = setInterval(updateTimer, 100);
+  }
+
+  function stopRecording() {
+    mediaRecorder.stop();
+    isRecording = false;
+    document.getElementById('recBtn').textContent = 'Record';
+    document.getElementById('recBtn').classList.remove('recording');
+    document.getElementById('tally').classList.remove('active');
+    clearInterval(timerInterval);
+    document.getElementById('timer').textContent = '00:00:00';
+  }
+
+  function updateTimer() {
+    const now = Date.now();
+    const diff = now - startTime;
+    const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+    const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+    const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = `${h}:${m}:${s}`;
   }
 
   function resetPeak() {
@@ -347,7 +511,7 @@
     navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: deviceId } } }).then(s => {
       stream = s;
       source = audioCtx.createMediaStreamSource(s);
-      source.connect(analyser);
+      source.connect(lowCutNode);
     });
   }
 
@@ -357,82 +521,6 @@
   }
 
   function dbToPercent(db) {
-    return Math.max(0, Math.min(100, ((db + 60) / 60) * 100));
-  }
-
-  function draw() {
-    if (!running) return;
-    animFrame = requestAnimationFrame(draw);
-    const bufLen = analyser.frequencyBinCount;
-    const data = new Float32Array(bufLen);
-    analyser.getFloatTimeDomainData(data);
-
-    let sumSq = 0, maxAmp = 0;
-    for (let i = 0; i < bufLen; i++) {
-      sumSq += data[i] * data[i];
-      if (Math.abs(data[i]) > maxAmp) maxAmp = Math.abs(data[i]);
-    }
-    const rms = Math.sqrt(sumSq / bufLen);
-    const db = rmsToDb(rms);
-
-    if (db > peakDb) peakDb = db;
-    if (maxAmp >= 0.99) {
-      document.getElementById('clipBadge').className = 'clip-badge show';
-      clearTimeout(clipTimeout);
-      clipTimeout = setTimeout(() => {
-        document.getElementById('clipBadge').className = 'clip-badge';
-      }, 2000);
-    }
-
-    document.getElementById('dbVal').textContent = Math.round(db);
-    document.getElementById('peakVal').textContent = peakDb < -59 ? '—' : Math.round(peakDb);
-
-    const pct = dbToPercent(db);
-    const bar = document.getElementById('levelBar');
-    bar.style.width = pct.toFixed(1) + '%';
-    bar.className = 'bar-fill' + (pct > 92 ? ' peak' : pct > 75 ? ' warn' : '');
-
-    drawWave(data);
-  }
-
-  function drawWave(data) {
-    const canvas = document.getElementById('waveCanvas');
-    const ctx = canvas.getContext('2d');
-    const W = canvas.offsetWidth, H = 100;
-    canvas.width = W; canvas.height = H;
-    ctx.clearRect(0, 0, W, H);
-
-    ctx.strokeStyle = '#00FF41';
-    ctx.lineWidth = 2;
-    ctx.shadowBlur = 8;
-    ctx.shadowColor = '#00FF41';
-    ctx.beginPath();
-    const step = Math.max(1, Math.floor(data.length / W));
-    for (let i = 0; i < W; i++) {
-      const val = data[i * step] || 0;
-      const y = (0.5 - val * 0.45) * H;
-      i === 0 ? ctx.moveTo(i, y) : ctx.lineTo(i, y);
-    }
-    ctx.stroke();
-
-    // Baseline
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = '#005a0b';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2);
-    ctx.stroke();
-  }
-
-  function clearCanvas() {
-    const canvas = document.getElementById('waveCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-</script>
-</body>
-</html>
-ToPercent(db) {
     return Math.max(0, Math.min(100, ((db + 60) / 60) * 100));
   }
 
