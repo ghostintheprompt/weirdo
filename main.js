@@ -108,6 +108,16 @@ function checkForUpdates(silent) {
 }
 
 app.whenReady().then(() => {
+  if (process.platform === 'darwin') {
+    app.setAboutPanelOptions({
+      applicationName: 'Weirdo',
+      applicationVersion: VERSION,
+      copyright: 'Built by MDRN Corp',
+      credits: 'mdrn.app',
+      website: 'https://mdrn.app',
+      iconPath: path.join(__dirname, 'assets', 'icon.png'),
+    })
+  }
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
