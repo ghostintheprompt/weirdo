@@ -23,8 +23,12 @@ Digital distortion (clipping) ruins recordings. Weirdo has a dedicated **CLIP** 
 #### Pro-level metering
 Instead of guessing, you get real decibel (dB) numbers. It tracks your **Peak Level**—the loudest point reached—so you can find your highest volume and set your gain perfectly. Need to start over? Just hit "Reset Peak."
 
-#### See your sound
-A live waveform (oscilloscope) shows you the actual shape of your audio signal. It helps you spot background hum, consistency issues, or if your signal is "flat-topping" (clipping) visually.
+#### Direct-to-Disk Recording
+Capture your audio instantly with the high-fidelity recording engine.
+*   **Tally Light:** A glowing red indicator lets you know exactly when you're "on air."
+*   **Precision Timer:** Tracks your recording duration down to the second.
+*   **Lossless-grade quality:** Records in high-bitrate Opus (WebM) for transparent audio capture.
+*   **Direct Saving:** Save your files directly to your Mac—no cloud, no temp files, just clean audio.
 
 ---
 

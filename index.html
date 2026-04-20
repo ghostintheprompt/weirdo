@@ -219,9 +219,14 @@
 
   <div class="card">
     <div class="controls">
-      <button class="primary" id="startBtn" onclick="startMonitor()">Start monitoring</button>
-      <button id="stopBtn" style="display:none" onclick="stopMonitor()">Stop</button>
-      <button id="resetBtn" style="display:none" class="danger" onclick="resetPeak()">Reset peak</button>
+      <button class="primary" id="startBtn" onclick="startMonitor()">Monitor</button>
+      <button id="stopBtn" style="display:none" onclick="stopMonitor()">Kill</button>
+      <button id="recBtn" style="display:none" class="danger" onclick="toggleRecord()">Record</button>
+      <button id="resetBtn" style="display:none" class="danger" onclick="resetPeak()">Reset</button>
+      <div id="tally" class="tally">
+        <span class="tally-light"></span>
+        <span id="timer">00:00:00</span>
+      </div>
       <span class="status" id="statusMsg">Ready</span>
     </div>
     <div id="deviceRow">
@@ -352,6 +357,82 @@
   }
 
   function dbToPercent(db) {
+    return Math.max(0, Math.min(100, ((db + 60) / 60) * 100));
+  }
+
+  function draw() {
+    if (!running) return;
+    animFrame = requestAnimationFrame(draw);
+    const bufLen = analyser.frequencyBinCount;
+    const data = new Float32Array(bufLen);
+    analyser.getFloatTimeDomainData(data);
+
+    let sumSq = 0, maxAmp = 0;
+    for (let i = 0; i < bufLen; i++) {
+      sumSq += data[i] * data[i];
+      if (Math.abs(data[i]) > maxAmp) maxAmp = Math.abs(data[i]);
+    }
+    const rms = Math.sqrt(sumSq / bufLen);
+    const db = rmsToDb(rms);
+
+    if (db > peakDb) peakDb = db;
+    if (maxAmp >= 0.99) {
+      document.getElementById('clipBadge').className = 'clip-badge show';
+      clearTimeout(clipTimeout);
+      clipTimeout = setTimeout(() => {
+        document.getElementById('clipBadge').className = 'clip-badge';
+      }, 2000);
+    }
+
+    document.getElementById('dbVal').textContent = Math.round(db);
+    document.getElementById('peakVal').textContent = peakDb < -59 ? '—' : Math.round(peakDb);
+
+    const pct = dbToPercent(db);
+    const bar = document.getElementById('levelBar');
+    bar.style.width = pct.toFixed(1) + '%';
+    bar.className = 'bar-fill' + (pct > 92 ? ' peak' : pct > 75 ? ' warn' : '');
+
+    drawWave(data);
+  }
+
+  function drawWave(data) {
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.offsetWidth, H = 100;
+    canvas.width = W; canvas.height = H;
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.strokeStyle = '#00FF41';
+    ctx.lineWidth = 2;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#00FF41';
+    ctx.beginPath();
+    const step = Math.max(1, Math.floor(data.length / W));
+    for (let i = 0; i < W; i++) {
+      const val = data[i * step] || 0;
+      const y = (0.5 - val * 0.45) * H;
+      i === 0 ? ctx.moveTo(i, y) : ctx.lineTo(i, y);
+    }
+    ctx.stroke();
+
+    // Baseline
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = '#005a0b';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2);
+    ctx.stroke();
+  }
+
+  function clearCanvas() {
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+</script>
+</body>
+</html>
+ToPercent(db) {
     return Math.max(0, Math.min(100, ((db + 60) / 60) * 100));
   }
 

@@ -1,20 +1,22 @@
-const { app, BrowserWindow, Menu, shell, dialog, net } = require('electron')
+const { app, BrowserWindow, Menu, shell, dialog, net, ipcMain } = require('electron')
 const path = require('path')
+const fs = require('fs')
 
 const REPO = 'ghostintheprompt/weirdo'
 const VERSION = app.getVersion()
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 600,
-    height: 700,
+    width: 640,
+    height: 800,
     minWidth: 480,
-    minHeight: 560,
+    minHeight: 600,
     titleBarStyle: 'hiddenInset',
     backgroundColor: '#0a0a0a',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, 'assets', 'icon.png'),
   })
@@ -27,6 +29,24 @@ function createWindow() {
     checkForUpdates(true)
   }, 3000)
 }
+
+ipcMain.handle('get-downloads-path', () => app.getPath('downloads'))
+
+ipcMain.handle('save-recording', async (event, arrayBuffer, fileName) => {
+  const { filePath } = await dialog.showSaveDialog({
+    title: 'Save Recording',
+    defaultPath: path.join(app.getPath('downloads'), fileName),
+    filters: [
+      { name: 'Audio', extensions: ['webm', 'opus', 'wav'] }
+    ]
+  })
+
+  if (filePath) {
+    fs.writeFileSync(filePath, Buffer.from(arrayBuffer))
+    return filePath
+  }
+  return null
+})
 
 function setupMenu() {
   const template = [
