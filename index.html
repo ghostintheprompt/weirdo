@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mic Monitor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f5;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.1);
+      --text: #1a1a1a;
+      --muted: #666;
+      --hint: #999;
+      --green: #1D9E75;
+      --green-light: rgba(29,158,117,0.12);
+      --amber: #BA7517;
+      --red: #E24B4A;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a1a;
+        --surface: #252525;
+        --border: rgba(255,255,255,0.1);
+        --text: #f0f0f0;
+        --muted: #aaa;
+        --hint: #666;
+        --green-light: rgba(29,158,117,0.18);
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 52px 20px 20px;
+      min-height: 100vh;
+      user-select: none;
+      -webkit-app-region: drag;
+    }
+
+    h1 {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      margin-bottom: 18px;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      -webkit-app-region: no-drag;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--hint);
+      margin-bottom: 6px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .metric .big {
+      font-size: 36px;
+      font-weight: 300;
+      letter-spacing: -1px;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .metric .unit {
+      font-size: 14px;
+      color: var(--muted);
+      margin-left: 3px;
+    }
+
+    .bar-track {
+      height: 10px;
+      background: var(--bg);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 5px;
+      background: var(--green);
+      transition: width 0.04s linear, background 0.2s;
+    }
+
+    .bar-fill.warn { background: var(--amber); }
+    .bar-fill.peak { background: var(--red); }
+
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--hint);
+    }
+
+    canvas {
+      width: 100%;
+      height: 90px;
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      display: block;
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      -webkit-app-region: no-drag;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 13px;
+      padding: 7px 16px;
+      border-radius: var(--radius-sm);
+      border: 0.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s;
+      -webkit-app-region: no-drag;
+    }
+
+    button:hover { background: var(--bg); }
+
+    button.primary {
+      background: var(--green);
+      color: #fff;
+      border-color: transparent;
+      font-weight: 500;
+    }
+
+    button.primary:hover { background: #178a64; }
+    button.danger { border-color: var(--red); color: var(--red); }
+    button.danger:hover { background: rgba(226,75,74,0.08); }
+
+    .status {
+      font-size: 12px;
+      color: var(--hint);
+    }
+
+    .status.ok { color: var(--green); }
+    .status.err { color: var(--red); }
+
+    select {
+      font-family: inherit;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      border: 0.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      max-width: 100%;
+      -webkit-app-region: no-drag;
+    }
+
+    #deviceRow {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      -webkit-app-region: no-drag;
+    }
+
+    .clip-badge {
+      display: none;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--red);
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .clip-badge.show { display: inline-block; }
+
+    .section-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Mic Monitor</h1>
+
+  <div class="card">
+    <div class="controls">
+      <button class="primary" id="startBtn" onclick="startMonitor()">Start monitoring</button>
+      <button id="stopBtn" style="display:none" onclick="stopMonitor()">Stop</button>
+      <button id="resetBtn" style="display:none" class="danger" onclick="resetPeak()">Reset peak</button>
+      <span class="status" id="statusMsg">Ready</span>
+    </div>
+    <div id="deviceRow">
+      <span style="font-size:12px;color:var(--hint)">Input:</span>
+      <select id="deviceSelect" onchange="changeDevice()"></select>
+    </div>
+  </div>
+
+  <div class="metrics" style="margin-bottom:12px">
+    <div class="card metric">
+      <div class="label">Level</div>
+      <div><span class="big" id="dbVal">—</span><span class="unit">dB</span></div>
+    </div>
+    <div class="card metric">
+      <div class="label" style="display:flex;align-items:center;gap:6px">
+        Peak <span class="clip-badge" id="clipBadge">CLIP</span>
+      </div>
+      <div><span class="big" id="peakVal">—</span><span class="unit">dB</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label" style="margin-bottom:10px">Signal strength</div>
+    <div class="bar-track"><div class="bar-fill" id="levelBar"></div></div>
+    <div class="bar-labels">
+      <span>–60 dB</span><span>–30 dB</span><span>–18 dB</span><span>0 dB</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-row">
+      <div class="label" style="margin-bottom:0">Waveform</div>
+    </div>
+    <canvas id="waveCanvas"></canvas>
+  </div>
+
+<script>
+  let audioCtx, analyser, source, stream, animFrame;
+  let peakDb = -Infinity;
+  let running = false;
+  let clipTimeout = null;
+
+  function startMonitor() {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then(s => {
+        stream = s;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 2048;
+        analyser.smoothingTimeConstant = 0.45;
+        source = audioCtx.createMediaStreamSource(s);
+        source.connect(analyser);
+        running = true;
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = '';
+        document.getElementById('resetBtn').style.display = '';
+        document.getElementById('statusMsg').textContent = 'Listening…';
+        document.getElementById('statusMsg').className = 'status ok';
+        loadDevices();
+        draw();
+      })
+      .catch(() => {
+        document.getElementById('statusMsg').textContent = 'Mic access denied — check System Settings › Privacy › Microphone';
+        document.getElementById('statusMsg').className = 'status err';
+      });
+  }
+
+  function stopMonitor() {
+    running = false;
+    cancelAnimationFrame(animFrame);
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (audioCtx) audioCtx.close();
+    document.getElementById('startBtn').style.display = '';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('resetBtn').style.display = 'none';
+    document.getElementById('deviceRow').style.display = 'none';
+    document.getElementById('statusMsg').textContent = 'Stopped';
+    document.getElementById('statusMsg').className = 'status';
+    document.getElementById('dbVal').textContent = '—';
+    document.getElementById('peakVal').textContent = '—';
+    document.getElementById('levelBar').style.width = '0%';
+    document.getElementById('levelBar').className = 'bar-fill';
+    document.getElementById('clipBadge').className = 'clip-badge';
+    clearCanvas();
+  }
+
+  function resetPeak() {
+    peakDb = -Infinity;
+    document.getElementById('peakVal').textContent = '—';
+    document.getElementById('clipBadge').className = 'clip-badge';
+  }
+
+  function loadDevices() {
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+      const inputs = devices.filter(d => d.kind === 'audioinput');
+      if (inputs.length > 1) {
+        const sel = document.getElementById('deviceSelect');
+        sel.innerHTML = '';
+        inputs.forEach((d, i) => {
+          const opt = document.createElement('option');
+          opt.value = d.deviceId;
+          opt.textContent = d.label || 'Microphone ' + (i + 1);
+          sel.appendChild(opt);
+        });
+        document.getElementById('deviceRow').style.display = 'flex';
+      }
+    });
+  }
+
+  function changeDevice() {
+    const deviceId = document.getElementById('deviceSelect').value;
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (source) source.disconnect();
+    navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: deviceId } } }).then(s => {
+      stream = s;
+      source = audioCtx.createMediaStreamSource(s);
+      source.connect(analyser);
+    });
+  }
+
+  function rmsToDb(rms) {
+    if (rms < 0.00001) return -60;
+    return Math.max(-60, 20 * Math.log10(rms));
+  }
+
+  function dbToPercent(db) {
+    return Math.max(0, Math.min(100, ((db + 60) / 60) * 100));
+  }
+
+  function draw() {
+    if (!running) return;
+    animFrame = requestAnimationFrame(draw);
+    const bufLen = analyser.frequencyBinCount;
+    const data = new Float32Array(bufLen);
+    analyser.getFloatTimeDomainData(data);
+
+    let sumSq = 0, maxAmp = 0;
+    for (let i = 0; i < bufLen; i++) {
+      sumSq += data[i] * data[i];
+      if (Math.abs(data[i]) > maxAmp) maxAmp = Math.abs(data[i]);
+    }
+    const rms = Math.sqrt(sumSq / bufLen);
+    const db = rmsToDb(rms);
+
+    if (db > peakDb) peakDb = db;
+    if (maxAmp >= 0.99) {
+      document.getElementById('clipBadge').className = 'clip-badge show';
+      clearTimeout(clipTimeout);
+      clipTimeout = setTimeout(() => {
+        document.getElementById('clipBadge').className = 'clip-badge';
+      }, 2000);
+    }
+
+    document.getElementById('dbVal').textContent = Math.round(db);
+    document.getElementById('peakVal').textContent = peakDb < -59 ? '—' : Math.round(peakDb);
+
+    const pct = dbToPercent(db);
+    const bar = document.getElementById('levelBar');
+    bar.style.width = pct.toFixed(1) + '%';
+    bar.className = 'bar-fill' + (pct > 92 ? ' peak' : pct > 75 ? ' warn' : '');
+
+    drawWave(data);
+  }
+
+  function drawWave(data) {
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.offsetWidth, H = 90;
+    canvas.width = W; canvas.height = H;
+    ctx.clearRect(0, 0, W, H);
+
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    ctx.strokeStyle = '#1D9E75';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const step = Math.max(1, Math.floor(data.length / W));
+    for (let i = 0; i < W; i++) {
+      const val = data[i * step] || 0;
+      const y = (0.5 - val * 0.45) * H;
+      i === 0 ? ctx.moveTo(i, y) : ctx.lineTo(i, y);
+    }
+    ctx.stroke();
+
+    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2);
+    ctx.stroke();
+  }
+
+  function clearCanvas() {
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+</script>
+</body>
+</html>
