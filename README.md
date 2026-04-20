@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/icon.png" width="320" height="320" alt="Mic Monitor Icon">
+  <img src="https://raw.githubusercontent.com/ghostintheprompt/weirdo/main/assets/icon.png" width="320" height="320" alt="Mic Monitor Icon">
   <h1>Mic Monitor</h1>
   <p><strong>A native macOS app for monitoring microphone input levels in real time.</strong></p>
 
