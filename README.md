@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/ghostintheprompt/weirdo/main/assets/icon.png" width="320" height="320" alt="Weirdo Icon">
+  <img src="assets/icon.png" width="320" height="320" alt="Weirdo Icon">
   <h1>Weirdo</h1>
   <p><strong>The simple, pro-grade audio levels monitor for macOS. No fluff, just the levels you need.</strong></p>
 
