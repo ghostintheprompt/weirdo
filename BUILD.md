@@ -1,6 +1,6 @@
 # Build Instructions
 
-Follow these steps to build Mic Monitor from source on macOS.
+Follow these steps to build Weirdo from source on macOS.
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ Follow these steps to build Mic Monitor from source on macOS.
 
 4. **Locate the output**
    The generated DMG will be in the `dist/` directory:
-   `dist/Mic Monitor-1.0.0-arm64.dmg`
+   `dist/Weirdo-1.0.0-arm64.dmg`
 
 ## First Launch
 
@@ -41,5 +41,5 @@ When launching the app for the first time, you may need to:
 
 If you encounter a "damaged" error, run:
 ```bash
-xattr -cr /Applications/Mic\ Monitor.app
+xattr -cr /Applications/Weirdo.app
 ```

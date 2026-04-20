@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Building Mic Monitor DMG..."
+echo "Building Weirdo DMG..."
 
 # Ensure dependencies are installed
 npm install

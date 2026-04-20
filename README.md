@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/ghostintheprompt/weirdo/main/assets/icon.png" width="320" height="320" alt="Weirdo Icon">
   <h1>Weirdo</h1>
-  <p><strong>The simple, pro-grade mic monitor for macOS. No fluff, just the levels you need.</strong></p>
+  <p><strong>The simple, pro-grade audio levels monitor for macOS. No fluff, just the levels you need.</strong></p>
 
   [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
   [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)]()
