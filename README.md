@@ -15,7 +15,7 @@
 Most apps just give you a jumping green bar. **Weirdo** is built for people who actually care about their audio quality—whether you're dialing in a lavalier mic for a video, setting gain on a podcast, or making sure your interface isn't distorting.
 
 #### Works with any mic
-Whether it's a high-end XLR interface, a USB condenser, or a tiny lavalier mic plugged into your jack, if macOS sees it, Weirdo can monitor it. You can switch between devices instantly right in the app.
+Whether it's a high-end XLR interface, a USB condenser, or a tiny lavalier mic plugged into your jack, if macOS sees it, Weirdo can monitor it. There is no limit to how many devices you can have connected—Weirdo automatically detects every input (from 1 to 32+ channels) and lets you switch between them instantly.
 
 #### Never clip again
 Digital distortion (clipping) ruins recordings. Weirdo has a dedicated **CLIP** badge that triggers the moment your signal hits the danger zone (0 dB). The meters turn from green to amber and then red, giving you clear visual warnings before your audio gets "crunched."
