@@ -1,4 +1,6 @@
-<img src="assets/icon.png" width="200">
+<p align="center">
+  <img src="assets/icon.png" width="520">
+</p>
 
 # Weirdo
 The simple, pro-grade audio levels monitor for macOS. No fluff, just the levels you need. — v1.0
