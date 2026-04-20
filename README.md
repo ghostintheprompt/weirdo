@@ -1,12 +1,11 @@
-<div align="center">
-  <img src="assets/icon.png" width="320" height="320" alt="Weirdo Icon">
-  <h1>Weirdo</h1>
-  <p><strong>The simple, pro-grade audio levels monitor for macOS. No fluff, just the levels you need.</strong></p>
+<img src="assets/icon.png" width="200">
 
-  [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-  [![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)]()
-  [![Release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/ghostintheprompt/weirdo/releases)
-</div>
+# Weirdo
+The simple, pro-grade audio levels monitor for macOS. No fluff, just the levels you need. — v1.0
+
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-macOS-lightgrey.svg)]()
+[![Release](https://img.shields.io/badge/release-v1.0.0-blue.svg)](https://github.com/ghostintheprompt/weirdo/releases)
 
 ---
 
