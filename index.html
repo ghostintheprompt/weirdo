@@ -332,7 +332,14 @@
   let timerInterval;
 
   function startMonitor() {
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    navigator.mediaDevices.getUserMedia({ 
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }, 
+      video: false 
+    })
       .then(s => {
         stream = s;
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -435,7 +442,10 @@
   function startRecording() {
     audioChunks = [];
     const mimeType = 'audio/webm;codecs=opus';
-    mediaRecorder = new MediaRecorder(stream, { mimeType });
+    mediaRecorder = new MediaRecorder(stream, { 
+      mimeType,
+      audioBitsPerSecond: 256000 
+    });
 
     mediaRecorder.ondataavailable = (event) => {
       audioChunks.push(event.data);
@@ -513,7 +523,14 @@
     const deviceId = document.getElementById('deviceSelect').value;
     if (stream) stream.getTracks().forEach(t => t.stop());
     if (source) source.disconnect();
-    navigator.mediaDevices.getUserMedia({ audio: { deviceId: { exact: deviceId } } }).then(s => {
+    navigator.mediaDevices.getUserMedia({ 
+      audio: { 
+        deviceId: { exact: deviceId },
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      } 
+    }).then(s => {
       stream = s;
       source = audioCtx.createMediaStreamSource(s);
       source.connect(lowCutNode);
